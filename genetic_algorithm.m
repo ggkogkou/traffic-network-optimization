@@ -1,20 +1,18 @@
 function [solution] = genetic_algorithm(objective_function, equality_constraints, initial_population_size, max_generations, elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x)
 % Implement genetic algorithm
 elitism_percentage = 0.1;
-roulette_wheel_percentage = 0.5;
+roulette_wheel_percentage = 0.4;
 
-mutation_probability = 0.1;
+mutation_probability = 0.2;
 
-initial_population_size = 200;
-max_generations = 1400;
+initial_population_size = 500;
+max_generations = 5000;
 elite_chromosomes_num = elitism_percentage * initial_population_size;
 roulette_wheel_num = roulette_wheel_percentage * initial_population_size;
-upper_x = 25;
-lower_x = 0;
 
 % Vehicle Flow
-V = 70;
-
+V = 100;
+clc
 % a_i multipliers
 a = [1.25; 1.25; 1.25; 1.25; 1.25; 1.5; 1.5; 1.5; 1.5; 1.5; 1; 1; ...
     1; 1; 1; 1; 1;];
@@ -39,7 +37,8 @@ h = @(x) [ ...
     x(12) + x(15) + x(16) + x(17) - V
 ];
 
-g = 1;
+upper_x = c;
+lower_x = zeros(17, 1);
 
 chromosome_length = 17;
 chromosome = NaN(chromosome_length, 1);
@@ -51,18 +50,21 @@ best_chromosome = NaN(max_generations, chromosome_length);
 best_chromosome_fitness_score = NaN(max_generations, 1);
 
 % Initialize population
-generation_num = 1;
-
 for i=1 : initial_population_size
+    % Initialize random chromosomes
     for j=1 : chromosome_length
-        chromosome(j) = unifrnd(lower_x, upper_x);
+        population(i,j) = unifrnd(lower_x(j), upper_x(j));
     end
-    population_fitness_scores(i) = fitness_function(f, chromosome, g, h);
-    population(i,:) = chromosome;
+
+    % Evaluate the fitness of the chromosome
+    population_fitness_scores(i) = fitness_function(f, chromosome, h);
 end
 
 % Sort population based on the fitness scores
-[population, population_fitness_scores] = sort_population(population, population_fitness_scores)
+[population, population_fitness_scores] = sort_population(population, population_fitness_scores);
+
+% Select the best chromosome at each generation and store it
+generation_num = 1;
 
 best_chromosome(generation_num,:) = population(1,:);
 best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
@@ -103,7 +105,7 @@ while generation_num < max_generations
 
     % Evaluate fitness scores
     for i=1 : initial_population_size
-        population_fitness_scores(i) = fitness_function(f, transpose(population(i,:)), g, h);
+        population_fitness_scores(i) = fitness_function(f, transpose(population(i,:)), h);
     end
 
     % Sort population based on the fitness scores
@@ -112,12 +114,22 @@ while generation_num < max_generations
     % Select best chromosome
     best_chromosome(generation_num,:) = population(1,:);
     best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
-    min_calc = f(transpose(best_chromosome(generation_num)));
+    min_calc = f(transpose(best_chromosome(generation_num,:)));
 
-    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\tMinimum is %.5f\n", generation_num, best_chromosome_fitness_score(generation_num), min_calc);
+    if min_calc < 0
+        population
+        population_fitness_scores
+        best_chromosome(generation_num,:)
+        pause
+    end
+
+    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f |\tMinimum is %.5f  \tMSE of Constraints: %f\n", generation_num, best_chromosome_fitness_score(generation_num), ...
+        min_calc, mse(h(best_chromosome(generation_num,:))));
 end
 
 solution = best_chromosome(length(best_chromosome),:);
+
+fprintf("\nMSE of Constraints: %f \n\n", mse(h(solution)));
 
 end
 
