@@ -1,9 +1,13 @@
-function task_1()
-    % Implement Task -- Vehicle Flow Rate = 100 (veh/min) = const.
+function task_2()
+    % Implement Task -- Vehicle Flow Rate = 100 +- 15% (veh/min) = const.
     clc
 
     % Vehicle Flow Rate
-    V = 100;
+    V_mean = 100;
+    deviation = 0.15;
+    lower_V_percent = 1 - deviation;
+    upper_V_percent = 1 + deviation;
+    V = generate_new_vehicle_flow(V_mean, lower_V_percent, upper_V_percent);
 
     % a_i multipliers
     a = [1.25; 1.25; 1.25; 1.25; 1.25; 1.5; 1.5; 1.5; 1.5; 1.5; 1; 1; ...
@@ -40,7 +44,10 @@ function task_1()
     end
 
     solutions
-    mean_solutions = mean(solutions, 1)
+    mean_solutions = mean(solutions, 2)
+
+
+
+
 
 end
-
