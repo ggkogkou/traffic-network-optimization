@@ -57,10 +57,12 @@ best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
 fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\n", generation_num, best_chromosome_fitness_score(1));
 
 % Implement Algorithm -- terminate when maximum generations are produced
-while generation_num < max_generations + 1
+while generation_num < max_generations
+    generation_num = generation_num + 1;
+
     % Create the next generation with the same size as the initial
     % Selection process -- Elitism + Roulette Wheel
-    [next_generation_population] = selection(population, population_fitness_scores, elite_chromosomes_num, roulette_wheel_num)
+    [next_generation_population] = selection(population, population_fitness_scores, elite_chromosomes_num, roulette_wheel_num);
 
     % Crossover the remaining percentage of next generation
     for i=elite_chromosomes_num+roulette_wheel_num+1 : 2 : initial_population_size
@@ -98,11 +100,7 @@ while generation_num < max_generations + 1
     best_chromosome(generation_num,:) = population(1,:);
     best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
 
-    generation_num = generation_num + 1;
-
-    if generation_num <= max_generations
-        fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\n", generation_num, best_chromosome_fitness_score(generation_num));
-    end
+    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\n", generation_num, best_chromosome_fitness_score(generation_num));
 end
 
 if generation_num > 1
