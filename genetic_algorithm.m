@@ -1,20 +1,33 @@
-function genetic_algorithm()
-
-V = 70;
-
+function [solution] = genetic_algorithm(objective_function, equality_constraints, initial_population_size, max_generations, elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x)
+% Implement genetic algorithm
 elitism_percentage = 0.1;
 roulette_wheel_percentage = 0.5;
 
 mutation_probability = 0.1;
 
-initial_population_size = 20;
-max_generations = 40;
+initial_population_size = 200;
+max_generations = 1400;
 elite_chromosomes_num = elitism_percentage * initial_population_size;
 roulette_wheel_num = roulette_wheel_percentage * initial_population_size;
-crossover_num = initial_population_size - elite_chromosomes_num - roulette_wheel_num;
-upper_c = 25;
-lower_c = 0;
+upper_x = 25;
+lower_x = 0;
 
+% Vehicle Flow
+V = 70;
+
+% a_i multipliers
+a = [1.25; 1.25; 1.25; 1.25; 1.25; 1.5; 1.5; 1.5; 1.5; 1.5; 1; 1; ...
+    1; 1; 1; 1; 1;];
+
+% c_i upper bound per graph acme
+c = [54.13; 21.56; 34.08; 49.19; 33.03; 21.84; 29.96; 24.87; 47.24; ...
+    33.97; 26.89; 32.76; 39.98; 37.12; 53.83; 61.65; 59.73];
+
+% Function to be minimized (veh/min*min), where x is a 1x17 column vector
+% a, c, x are column vectors so i apply elementwise operators
+f = @(x) sum(a.*x./(1.-x./c));
+
+% Equality Constraints
 h = @(x) [ ...
     x(1) + x(2) + x(3) + x(4) - V;
     x(5) + x(6) - x(1);
@@ -24,16 +37,16 @@ h = @(x) [ ...
     x(6) + x(7) + x(13) - x(14) - x(15);
     x(5) + x(14) - x(16);
     x(12) + x(15) + x(16) + x(17) - V
- ];
-
-f = @(x) (x^2 + 5);
+];
 
 g = 1;
 
 chromosome_length = 17;
 chromosome = NaN(chromosome_length, 1);
+
 population = NaN(initial_population_size, chromosome_length);
 population_fitness_scores = NaN(initial_population_size, 1);
+
 best_chromosome = NaN(max_generations, chromosome_length);
 best_chromosome_fitness_score = NaN(max_generations, 1);
 
@@ -42,14 +55,14 @@ generation_num = 1;
 
 for i=1 : initial_population_size
     for j=1 : chromosome_length
-        chromosome(j) = unifrnd(lower_c, upper_c);
+        chromosome(j) = unifrnd(lower_x, upper_x);
     end
     population_fitness_scores(i) = fitness_function(f, chromosome, g, h);
     population(i,:) = chromosome;
 end
 
 % Sort population based on the fitness scores
-[population, population_fitness_scores] = sort_population(population, population_fitness_scores);
+[population, population_fitness_scores] = sort_population(population, population_fitness_scores)
 
 best_chromosome(generation_num,:) = population(1,:);
 best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
@@ -80,7 +93,7 @@ while generation_num < max_generations
     for i=1 : initial_population_size
         % Perform mutation with a certain probability -> mutation_probability
         if unifrnd(0, 1) < mutation_probability
-            next_generation_population(i,:) = mutation(population(i,:), upper_c, lower_c);
+            next_generation_population(i,:) = mutation(population(i,:), upper_x, lower_x);
         end
     end
 
@@ -90,7 +103,7 @@ while generation_num < max_generations
 
     % Evaluate fitness scores
     for i=1 : initial_population_size
-        population_fitness_scores(i) = fitness_function(f, chromosome, g, h);
+        population_fitness_scores(i) = fitness_function(f, transpose(population(i,:)), g, h);
     end
 
     % Sort population based on the fitness scores
@@ -99,17 +112,12 @@ while generation_num < max_generations
     % Select best chromosome
     best_chromosome(generation_num,:) = population(1,:);
     best_chromosome_fitness_score(generation_num) = population_fitness_scores(1);
+    min_calc = f(transpose(best_chromosome(generation_num)));
 
-    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\n", generation_num, best_chromosome_fitness_score(generation_num));
+    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f\tMinimum is %.5f\n", generation_num, best_chromosome_fitness_score(generation_num), min_calc);
 end
 
-if generation_num > 1
-    selected_chromosome = best_chromosome(generation_num-1, :)
-else
-    selected_chromosome = best_chromosome(generation_num, :)
-end
-
-fprintf("Generations demanded: %d\n", generation_num - 1);
+solution = best_chromosome(length(best_chromosome),:);
 
 end
 
