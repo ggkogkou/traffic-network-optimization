@@ -2,6 +2,7 @@ function [solution, best_chromosomes_stats] = genetic_algorithm(objective_functi
     initial_population_size, max_generations, elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x)
 
 % Implement the genetic algorithm
+addpath('src/');
 
 % Uncomment to run the algorithm internally, or, comment out to run externally
 [objective_function, equality_constraints, chromosome_length, initial_population_size, max_generations, ...

@@ -7,8 +7,9 @@ function task_2()
         roulette_wheel_percentage, mutation_probability, upper_x, lower_x, v_mean, v_deviation, h_const, g] = load_data();
 
     % Execute the Genetic Algorithm and store the solutions
-    solutions = NaN(8, 17);
-    for i=1 : 1
+    executions_num = 8;
+    solutions = NaN(executions_num, chromosome_length);
+    for i=1 : executions_num
         [solutions(i,:), stats] = genetic_algorithm_adaptive(f, chromosome_length, initial_population_size, max_generations, ...
             elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x, v_mean, v_deviation, h_const, g);
     end
