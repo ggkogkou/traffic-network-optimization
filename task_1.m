@@ -33,10 +33,18 @@ function task_1()
     upper_bounds = c;
     lower_bounds = zeros(17, 1);
 
+    % Genetic Algorithm paramters
+    initial_population_size = 500;
+    max_generations = 5000;
+    elitism_percentage = 0.1;
+    roulette_wheel_percentage = 0.4;
+    mutation_probability = 0.25;
+
     % Execute the Genetic Algorithm and store the solutions
     solutions = NaN(8, 17);
     for i=1 : 8
-        [solutions(i,:)] = genetic_algorithm(f, h, 500, 5000, 0.1, 0.4, 0.25, upper_bounds, lower_bounds);
+        [solutions(i,:)] = genetic_algorithm(f, h, initial_population_size, max_generations, elitism_percentage, ...
+            roulette_wheel_percentage, mutation_probability, upper_bounds, lower_bounds);
     end
 
     solutions
