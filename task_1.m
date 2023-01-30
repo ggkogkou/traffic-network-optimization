@@ -2,53 +2,52 @@ function task_1()
     % Implement Task -- Vehicle Flow Rate = 100 (veh/min) = const.
     clc
 
-    % Vehicle Flow Rate
-    V = 100;
-
-    % a_i multipliers
-    a = [1.25; 1.25; 1.25; 1.25; 1.25; 1.5; 1.5; 1.5; 1.5; 1.5; 1; 1; ...
-        1; 1; 1; 1; 1;];
-
-    % c_i upper bound per graph acme
-    c = [54.13; 21.56; 34.08; 49.19; 33.03; 21.84; 29.96; 24.87; 47.24; ...
-        33.97; 26.89; 32.76; 39.98; 37.12; 53.83; 61.65; 59.73];
-
-    % Function to be minimized (veh/min*min), where x is a 1x17 column vector
-    % a, c, x are column vectors so i apply elementwise operators
-    f = @(x) sum(a.*x./(1.-x./c));
-
-    % Equality Constraints
-    h = @(x) [ ...
-        x(1) + x(2) + x(3) + x(4) - V;
-        x(5) + x(6) - x(1);
-        x(7) + x(8) - x(2);
-        x(9) + x(10) - x(4);
-        x(3) + x(9) + x(8) - x(13) - x(12) - x(11);
-        x(6) + x(7) + x(13) - x(14) - x(15);
-        x(5) + x(14) - x(16);
-        x(12) + x(15) + x(16) + x(17) - V
-    ];
-
-    % Bounds for each gene (x_i)
-    upper_bounds = c;
-    lower_bounds = zeros(17, 1);
-
-    % Genetic Algorithm paramters
-    initial_population_size = 500;
-    max_generations = 5000;
-    elitism_percentage = 0.1;
-    roulette_wheel_percentage = 0.4;
-    mutation_probability = 0.25;
+    % Load Genetic Algorithm paramters
+    [f, h, chromosome_length, initial_population_size, max_generations, ...
+    elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x] = load_data();
 
     % Execute the Genetic Algorithm and store the solutions
     solutions = NaN(8, 17);
-    for i=1 : 8
-        [solutions(i,:)] = genetic_algorithm(f, h, initial_population_size, max_generations, elitism_percentage, ...
-            roulette_wheel_percentage, mutation_probability, upper_bounds, lower_bounds);
+    for i=1 : 1
+        [solutions(i,:), stats] = genetic_algorithm(f, h, chromosome_length, initial_population_size, max_generations, ...
+            elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x);
     end
 
-    solutions
-    mean_solutions = mean(solutions, 1)
+    % Display the solutions of all of the algorithm executions
+    disp(solutions)
+
+    % Calculate the mean of all of the solutions to give a final answer
+    mean_solution = mean(solutions, 1);
+    disp(mean_solution);
+    
+    % Get the data from the generations statistics for the last sample
+    % algorithm execution: @param stats is a 4x1 cell array
+    best_chroms_fitness_scores = stats{2, 1};
+    best_chroms_constraints_violations = stats{3, 1};
+    best_chroms_mins = stats{4, 1};
+
+    % Print the Mean Square Error of the violation of the constraints and
+    % the minmum of the objective function
+    fprintf("The solution has Constraints Violetion MSE = %.6f and the minmum is f(x) = %.6f\n", ...
+        best_chroms_constraints_violations(end, 1), best_chroms_mins(end, 1));
+
+    % Plot the fitness scores as the population evolves
+    figure(1);
+    x_axis = linspace(0, max_generations, max_generations);
+    y_axis = transpose(best_chroms_fitness_scores(:,:));
+    plot(x_axis, y_axis);
+
+    % Plot the constraints violations as the population evolves
+    figure(2);
+    y_axis = transpose(best_chroms_constraints_violations(:,:));
+    plot(x_axis, y_axis);
+
+    % Plot the minima calculations as the population evolves
+    figure(3);
+    y_axis = transpose(best_chroms_mins(:,:));
+    plot(x_axis, y_axis);
 
 end
+
+
 

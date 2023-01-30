@@ -13,7 +13,7 @@ function [fitness_score] = adaptive_fitness_function(f, chromosome, h, t)
     penalty_term = (C*t)^2 * sum(h(chromosome).^2);
 
     % Calculate the fitness score
-    fitness_score = t^2 / (f(chromosome) + penalty_term);
+    fitness_score = t / (f(chromosome) + penalty_term);
 
 end
 

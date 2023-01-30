@@ -1,14 +1,20 @@
-function [solution, best_chromosomes_stats] = genetic_algorithm(objective_function, equality_constraints, chromosome_length, ...
-    initial_population_size, max_generations, elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x)
+function [solution, best_chromosomes_stats] = genetic_algorithm_adaptive(objective_function, chromosome_length, initial_population_size, ...
+    max_generations, elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x, v_mean, v_deviation, h_const, g)
 
 % Implement the genetic algorithm
 
 % Uncomment to run the algorithm internally, or, comment out to run externally
-[objective_function, equality_constraints, chromosome_length, initial_population_size, max_generations, ...
-    elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x, ~, ~, ~, ~] = load_data();
+[objective_function, ~, chromosome_length, initial_population_size, max_generations, ...
+    elitism_percentage, roulette_wheel_percentage, mutation_probability, upper_x, lower_x, v_mean, v_deviation, h_const, g] = load_data();
 
+% Obtain a random V value inside the given interval
+lowest_v = 1 - v_deviation;
+highest_v = 1 + v_deviation;
+V = generate_new_vehicle_flow(v_mean, lowest_v, highest_v);
+
+% Define objective function and equality constraints
 f = objective_function;
-h = equality_constraints;
+h = @(x) h_const(x) - g(x, V);
 
 % Determine the number of chromosomes to undergo elitism or roulette wheel
 elite_chromosomes_num = elitism_percentage * initial_population_size;
@@ -41,6 +47,10 @@ fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f |\tMinimum is 
 while generation_num < max_generations
     % Create a new generation
     generation_num = generation_num + 1;
+
+    % Update the equality constraints function heq with the new V
+    V = generate_new_vehicle_flow(v_mean, lowest_v, highest_v);
+    h = @(x) h_const(x) - g(x,V);
 
     % Selection process -- Elitism + Roulette Wheel
     [next_generation_population] = selection(population, population_fitness_scores, elite_chromosomes_num, roulette_wheel_num);
