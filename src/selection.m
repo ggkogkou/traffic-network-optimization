@@ -3,25 +3,26 @@ function [next_generation_population] = selection(population, fitness_scores, el
     % population
     next_generation_population = NaN(size(population));
 
+    elite_chromosomes_num = floor(elite_chromosomes_num);
+    roulette_wheel_num = floor(roulette_wheel_num);
+
     % Elitism -- Pass the strongest chromosomes to the next generation
     % Calculate how many chromosomes will survive due to elitism
-    strongest_chromosomes_to_survive_num = elite_chromosomes_num;
-    for i=1 : strongest_chromosomes_to_survive_num
+    for i=1 : elite_chromosomes_num
         next_generation_population(i,:) = population(i,:);
     end
 
     % Remove the previous chromosomes from the previous population
-    for i=1 : strongest_chromosomes_to_survive_num
+    for i=1 : elite_chromosomes_num
         population = remove_row_from_matrix(population, 1);
         fitness_scores = remove_row_from_matrix(fitness_scores, 1);
     end
 
     % Roulette Wheel Selection -- Pass some randomly selected chromosomes
     % to the next generation based on their fintess score
-    random_chromosomes_to_survive_num = roulette_wheel_num;
 
-    i = strongest_chromosomes_to_survive_num + 1;
-    i_max = strongest_chromosomes_to_survive_num + random_chromosomes_to_survive_num;
+    i = elite_chromosomes_num + 1;
+    i_max = elite_chromosomes_num + roulette_wheel_num;
     while i <= i_max
         % Matrix to store the probability of each chromosome to be selected
         probabilities = NaN(size(population, 1), 1);

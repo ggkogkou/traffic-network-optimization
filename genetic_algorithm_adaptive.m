@@ -18,8 +18,11 @@ f = objective_function;
 h = @(x) h_const(x) - g(x, V);
 
 % Determine the number of chromosomes to undergo elitism or roulette wheel
-elite_chromosomes_num = elitism_percentage * initial_population_size;
-roulette_wheel_num = roulette_wheel_percentage * initial_population_size;
+elite_chromosomes_num = floor(elitism_percentage * initial_population_size);
+roulette_wheel_num = floor(roulette_wheel_percentage * initial_population_size);
+if mod(roulette_wheel_num+elite_chromosomes_num, 2) == 1
+    roulette_wheel_num = roulette_wheel_num + 1;
+end
 
 % Initialize population
 [population, population_fitness_scores] = initialize_population(initial_population_size, chromosome_length, lower_x, upper_x, f, h);
@@ -38,11 +41,11 @@ generation_num = 1;
 
 best_chrom(generation_num,:) = population(1,:);
 best_chrom_fitness_scores(generation_num) = population_fitness_scores(1);
-best_chrom_constraints_violations(generation_num) = mse(h(population(1,:)));
+best_chrom_constraints_violations(generation_num) = MSE(h(population(1,:)));
 best_chrom_mins_calc(generation_num) = f(transpose(best_chrom(generation_num,:)));
 
-fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f |\tMinimum is %.5f |\t\tMSE of Constraints Violation: %f\n", generation_num, ...
-    best_chrom_fitness_scores(generation_num), best_chrom_mins_calc(generation_num), best_chrom_constraints_violations(generation_num));
+fprintf("Generation %d\t|  Fittest Chromosome Fitness Score: %.4f |  Minimum is %.5f |  MSE of Constraints Violation: %f\n", generation_num, ...
+        best_chrom_fitness_scores(generation_num), best_chrom_mins_calc(generation_num), best_chrom_constraints_violations(generation_num));
 
 % Implement Algorithm -- terminate when maximum generations are produced
 while generation_num < max_generations
@@ -91,10 +94,10 @@ while generation_num < max_generations
     % Select best chromosome
     best_chrom(generation_num,:) = population(1,:);
     best_chrom_fitness_scores(generation_num) = population_fitness_scores(1);
-    best_chrom_constraints_violations(generation_num) = mse(h(population(1,:)));
+    best_chrom_constraints_violations(generation_num) = MSE(h(population(1,:)));
     best_chrom_mins_calc(generation_num) = f(transpose(best_chrom(generation_num,:)));
 
-    fprintf("Generation %d\t|\tFittest Chromosome Fitness Score: %.4f |\tMinimum is %.5f |\t\tMSE of Constraints Violation: %f\n", generation_num, ...
+    fprintf("Generation %d\t|  Fittest Chromosome Fitness Score: %.4f |  Minimum is %.5f |  MSE of Constraints Violation: %f\n", generation_num, ...
         best_chrom_fitness_scores(generation_num), best_chrom_mins_calc(generation_num), best_chrom_constraints_violations(generation_num));
 end
 
